@@ -14,17 +14,17 @@ def new_packet(hwsrc, hwdst, ipsrc, ipdst, reply=False):
 
 def test_hub():
     s = TestScenario("hub tests")
-    s.add_interface('eth0', '10:00:00:00:00:01')
-    s.add_interface('eth1', '10:00:00:00:00:02')
-    s.add_interface('eth2', '10:00:00:00:00:03')
+    s.add_interface('eth0', '10:00:00:00:00:02')
+    s.add_interface('eth1', '10:00:00:00:00:03')
+    s.add_interface('eth2', '10:00:00:00:00:04')
 
     # test case 1: a frame with broadcast destination should get sent out
     # all ports except ingress
     testpkt = new_packet(
-        "30:00:00:00:00:02",
+        "30:00:00:00:00:03",
         "ff:ff:ff:ff:ff:ff",
-        "172.16.42.2",
-        "255.255.255.255"
+        "172.16.42.3",
+        "255.255.255.254"
     )
     s.expect(
         PacketInputEvent("eth1", testpkt, display=Ethernet),
@@ -40,10 +40,10 @@ def test_hub():
     # test case 2: a frame with any unicast address except one assigned to hub
     # interface should be sent out all ports except ingress
     reqpkt = new_packet(
-        "20:00:00:00:00:01",
-        "30:00:00:00:00:02",
-        '192.168.1.100',
-        '172.16.42.2'
+        "20:00:00:00:00:02",
+        "30:00:00:00:00:03",
+        '192.168.1.101',
+        '172.16.42.3'
     )
     s.expect(
         PacketInputEvent("eth0", reqpkt, display=Ethernet),
@@ -57,10 +57,10 @@ def test_hub():
     )
 
     resppkt = new_packet(
-        "30:00:00:00:00:02",
-        "20:00:00:00:00:01",
-        '172.16.42.2',
-        '192.168.1.100',
+        "30:00:00:00:00:03",
+        "20:00:00:00:00:02",
+        '172.16.42.3',
+        '192.168.1.101',
         reply=True
     )
     s.expect(
@@ -77,10 +77,10 @@ def test_hub():
     # test case 3: a frame with dest address of one of the interfaces should
     # result in nothing happening
     reqpkt = new_packet(
-        "20:00:00:00:00:01",
-        "10:00:00:00:00:03",
-        '192.168.1.100',
-        '172.16.42.2'
+        "20:00:00:00:00:02",
+        "10:00:00:00:00:04",
+        '192.168.1.101',
+        '172.16.42.3'
     )
     s.expect(
         PacketInputEvent("eth2", reqpkt, display=Ethernet),
